@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong gegen KI</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #4b0082;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 5px solid #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        #footer-text {
+            position: absolute;
+            bottom: 20px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        #scoreboard {
+            position: absolute;
+            top: 20px;
+            color: #fff;
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        .difficulty-container {
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 24px;
+        }
+        .difficulty-btn {
+            font-size: 18px;
+            background-color: #8e44ad;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .difficulty-btn:hover {
+            background-color: #9b59b6;
+        }
+    </style>
+</head>
+<body>
+    <div id="scoreboard">Spieler: 0 - KI: 0</div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="footer-text">by Kosmo Toast</div>
+
+    <div id="difficultyMenu" class="difficulty-container">
+        <h2>Wähle den Schwierigkeitsgrad:</h2>
+        <button class="difficulty-btn" onclick="startGame('easy')">Leicht</button>
+        <button class="difficulty-btn" onclick="startGame('medium')">Mittel</button>
+        <button class="difficulty-btn" onclick="startGame('hard')">Schwierig</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreboard = document.getElementById('scoreboard');
+
+        const paddleWidth = 12, paddleHeight = 100, ballSize = 12;
+        let paddleSpeed = 6, ballSpeedX = 4, ballSpeedY = 4;
+        let playerY = canvas.height / 2 - paddleHeight / 2;
+        let aiY = canvas.height / 2 - paddleHeight / 2;
+        let ballX = canvas.width / 2, ballY = canvas.height / 2;
+        let playerScore = 0, aiScore = 0;
+        let aiSpeed = 3;
+
+        let keys = {
+            playerUp: false,
+            playerDown: false
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'w' || e.key === 'W') keys.playerUp = true;
+            if (e.key === 's' || e.key === 'S') keys.playerDown = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'w' || e.key === 'W') keys.playerUp = false;
+            if (e.key === 's' || e.key === 'S') keys.playerDown = false;
+        });
+
+        function startGame(difficulty) {
+            document.getElementById('difficultyMenu').style.display = 'none';
+
+            if (difficulty === 'easy') {
+                aiSpeed = 2;
+            } else if (difficulty === 'medium') {
+                aiSpeed = 4;
+            } else if (difficulty === 'hard') {
+                aiSpeed = 6;
+            }
+
+            gameLoop();
+        }
+
+        function movePaddles() {
+            if (keys.playerUp && playerY > 0) playerY -= paddleSpeed;
+            if (keys.playerDown && playerY < canvas.height - paddleHeight) playerY += paddleSpeed;
+        }
+
+        function moveAI() {
+            if (ballY > aiY + paddleHeight / 2) {
+                aiY += aiSpeed;
+            } else if (ballY < aiY + paddleHeight / 2) {
+                aiY -= aiSpeed;
+            }
+            if (aiY < 0) aiY = 0;
+            if (aiY > canvas.height - paddleHeight) aiY = canvas.height - paddleHeight;
+        }
+
+        function moveBall() {
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            if (ballY <= 0 || ballY >= canvas.height - ballSize) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            if (ballX <= paddleWidth && ballY > playerY && ballY < playerY + paddleHeight) {
+                ballSpeedX = -ballSpeedX;
+                ballSpeedX *= 1.05;
+            }
+
+            if (ballX >= canvas.width - paddleWidth - ballSize && ballY > aiY && ballY < aiY + paddleHeight) {
+                ballSpeedX = -ballSpeedX;
+                ballSpeedX *= 1.05;
+            }
+
+            if (ballX <= 0) {
+                aiScore++;
+                updateScore();
+                resetBall();
+            }
+            if (ballX >= canvas.width) {
+                playerScore++;
+                updateScore();
+                resetBall();
+            }
+        }
+
+        function resetBall() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            ballSpeedX = 4 * (Math.random() > 0.5 ? 1 : -1);
+            ballSpeedY = 4 * (Math.random() > 0.5 ? 1 : -1);
+        }
+
+        function updateScore() {
+            scoreboard.textContent = `Spieler: ${playerScore} - KI: ${aiScore}`;
+        }
+
+        function draw() {
+            let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, 'rgba(75, 0, 130, 0.9)');
+            gradient.addColorStop(1, 'rgba(75, 0, 130, 0.6)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, playerY, paddleWidth, paddleHeight);
+            ctx.fillRect(canvas.width - paddleWidth, aiY, paddleWidth, paddleHeight);
+
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballSize, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function gameLoop() {
+            movePaddles();
+            moveAI();
+            moveBall();
+            draw();
+
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>
