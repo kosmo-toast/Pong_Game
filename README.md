@@ -3,7 +3,7 @@ It‘s the game pong in html. It‘s also on the website www.inputer.de
 
 pong game:
 -move up with "w" and down with "s"
--play against KI
+-play against AI
 -ball gets faster every time
 hope you like it -kosmo toast
 
