@@ -1,6 +1,8 @@
 # Pong_Game
 It‘s the game pong in html. It‘s also on the website www.inputer.de
 
+(This game is in german because I`m german)
+
 pong game:
 -move up with "w" and down with "s"
 -play against AI
