@@ -7,6 +7,8 @@ pong game:
 -ball gets faster every time
 hope you like it -kosmo toast
 
+!! I will not make any changes on this project and I will not fix anzthing because im to lazy xd!!
+
 This is how it looks:
 ![image](https://github.com/user-attachments/assets/584f3d46-8e14-4b80-bdd3-7fbb38781eb5)
 ![image](https://github.com/user-attachments/assets/c591cfc2-da1a-4a93-b7f7-f328d041a6a4)
